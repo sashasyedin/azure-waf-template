@@ -25,12 +25,13 @@
   <ItemGroup>
     <Content Include="Parameters\parameters.test.json" />
     <Content Include="Parameters\parameters.prod.json" />
-    <Content Include="Templates\gst.json" />
     <Content Include="Parameters\parameters.dev.json" />
+    <Content Include="Templates\gst.json" />
+    <Content Include="Templates\gst.waf.json" />
+    <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
-    <Content Include="Templates\gst.waf.json" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
