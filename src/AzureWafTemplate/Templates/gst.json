@@ -1,0 +1,282 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "type": "string",
+      "allowedValues": [
+        "Development",
+        "Staging",
+        "Production"
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "apiAppName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nodeAppName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "webAppServicePlanName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "webAppServicePlanSkuName": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "webAppServicePlanCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "Instance count for the app service plan."
+      }
+    },
+    "authEnabled": {
+      "type": "int"
+    },
+    "authClientId": {
+      "type": "string"
+    },
+    "authClientSecret": {
+      "type": "string"
+    },
+    "authTenantId": {
+      "type": "string"
+    },
+    "loggingRetentionDays": {
+      "type": "int"
+    },
+    "alwaysOn": {
+      "type": "bool"
+    },
+    "httpsOnly": {
+      "type": "bool"
+    },
+    "gtmContainerId": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "apiAppInsightsName": "[concat(parameters('apiAppName'), '-ai')]",
+    "nodeAppInsightsName": "[concat(parameters('nodeAppName'), '-ai')]",
+    "fullApiAppUrl": "[concat(parameters('apiAppName'), '.azurewebsites.net')]",
+    "fullApiAppScmUrl": "[concat(parameters('apiAppName'), '.scm.azurewebsites.net')]",
+    "fullNodeAppUrl": "[concat(parameters('nodeAppName'), '.azurewebsites.net')]",
+    "fullNodeAppScmUrl": "[concat(parameters('nodeAppName'), '.scm.azurewebsites.net')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "name": "[parameters('webAppServicePlanName')]",
+      "apiVersion": "2016-09-01",
+      "location": "[parameters('location')]",
+      "kind": "linux",
+      "sku": {
+        "name": "[parameters('webAppServicePlanSkuName')]",
+        "capacity": "[parameters('webAppServicePlanCapacity')]"
+      },
+      "properties": {
+        "reserved": true
+      },
+      "scale": null,
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "kind": "web",
+      "name": "[variables('apiAppInsightsName')]",
+      "apiVersion": "2015-05-01",
+      "location": "[parameters('location')]",
+      "tags": {},
+      "properties": {
+        "Application_Type": "web"
+      },
+      "scale": null,
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "kind": "Node.JS",
+      "name": "[variables('nodeAppInsightsName')]",
+      "apiVersion": "2015-05-01",
+      "location": "[parameters('location')]",
+      "tags": {},
+      "properties": {
+        "Application_Type": "Node.JS"
+      },
+      "scale": null,
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "name": "[parameters('apiAppName')]",
+      "apiVersion": "2016-08-01",
+      "location": "[parameters('location')]",
+      "kind": "app,linux",
+      "properties": {
+        "enabled": true,
+        "siteConfig": {
+          "linuxFxVersion": "DOTNETCORE|2.2",
+          "windowsFxVersion": null,
+          "requestTracingEnabled": true,
+          "httpLoggingEnabled": true,
+          "detailedErrorLoggingEnabled": true,
+          "logsDirectorySizeLimit": 35,
+          "alwaysOn": "[parameters('alwaysOn')]",
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(concat('Microsoft.Insights/components/', variables('apiAppInsightsName'))).InstrumentationKey]"
+            },
+            {
+              "name": "ASPNETCORE_ENVIRONMENT",
+              "value": "[parameters('environmentName')]"
+            },
+            {
+              "name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+              "value": "[parameters('loggingRetentionDays')]"
+            }
+          ],
+          "appCommandLine": "dotnet Project.API.dll",
+          "managedPipelineMode": "Integrated"
+        },
+        "hostNameSslStates": [
+          {
+            "name": "[variables('fullApiAppUrl')]",
+            "sslState": "Disabled",
+            "hostType": "Standard"
+          },
+          {
+            "name": "[variables('fullApiAppScmUrl')]",
+            "sslState": "Disabled",
+            "hostType": "Repository"
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('webAppServicePlanName'))]",
+        "reserved": true,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": "[parameters('httpsOnly')]"
+      },
+      "scale": null,
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('webAppServicePlanName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('apiAppInsightsName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "name": "[parameters('nodeAppName')]",
+      "apiVersion": "2016-08-01",
+      "location": "[parameters('location')]",
+      "kind": "app,linux",
+      "properties": {
+        "enabled": true,
+        "siteConfig": {
+          "linuxFxVersion": "NODE|10.10",
+          "windowsFxVersion": null,
+          "requestTracingEnabled": true,
+          "httpLoggingEnabled": true,
+          "detailedErrorLoggingEnabled": true,
+          "logsDirectorySizeLimit": 35,
+          "alwaysOn": "[parameters('alwaysOn')]",
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(concat('Microsoft.Insights/components/', variables('nodeAppInsightsName'))).InstrumentationKey]"
+            },
+            {
+              "name": "API_AUTH_CLIENT_ID",
+              "value": "[parameters('authClientId')]"
+            },
+            {
+              "name": "API_AUTH_CLIENT_SECRET",
+              "value": "[parameters('authClientSecret')]"
+            },
+            {
+              "name": "API_AUTH_ENABLED",
+              "value": "[parameters('authEnabled')]"
+            },
+            {
+              "name": "API_AUTH_TENANT_ID",
+              "value": "[parameters('authTenantId')]"
+            },
+            {
+              "name": "API_URL",
+              "value": "[concat('https://', variables('fullApiAppUrl'))]"
+            },
+            {
+              "name": "GTM_CONTAINER_ID",
+              "value": "[parameters('gtmContainerId')]"
+            },
+            {
+              "name": "NODE_ENV",
+              "value": "production"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "10.10.0"
+            },
+            {
+              "name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+              "value": "[parameters('loggingRetentionDays')]"
+            }
+          ],
+          "appCommandLine": "npm run server",
+          "managedPipelineMode": "Integrated"
+        },
+        "hostNameSslStates": [
+          {
+            "name": "[variables('fullNodeAppUrl')]",
+            "sslState": "Disabled",
+            "hostType": "Standard"
+          },
+          {
+            "name": "[variables('fullNodeAppScmUrl')]",
+            "sslState": "Disabled",
+            "hostType": "Repository"
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('webAppServicePlanName'))]",
+        "reserved": true,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": "[parameters('httpsOnly')]"
+      },
+      "scale": null,
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('webAppServicePlanName'))]"
+      ]
+    }
+  ],
+  "outputs": {}
+}

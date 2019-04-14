@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "Staging"
+    },
+    "location": {
+      "value": "North Europe"
+    },
+    "vnetName": {
+      "value": "project-test-vnet"
+    },
+    "appGatewayName": {
+      "value": "project-test-waf"
+    },
+    "webAppServicePlanName": {
+      "value": "project-test-sp"
+    },
+    "webAppServicePlanSkuName": {
+      "value": "S1"
+    },
+    "webAppServicePlanCapacity": {
+      "value": 1
+    },
+    "apiAppName": {
+      "value": "project-test-apiapp"
+    },
+    "nodeAppName": {
+      "value": "project-test-nodeapp"
+    },
+    "certData": {
+      "value": "XXX"
+    },
+    "loggingRetentionDays": {
+      "value": 7
+    },
+    "alwaysOn": {
+      "value": true
+    },
+    "httpsOnly": {
+      "value": true
+    },
+    "gtmContainerId": {
+      "value": "GTM-ABCD123"
+    }
+  }
+}

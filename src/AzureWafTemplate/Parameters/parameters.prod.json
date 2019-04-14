@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "Production"
+    },
+    "location": {
+      "value": "North Europe"
+    },
+    "vnetName": {
+      "value": "project-prod-vnet"
+    },
+    "appGatewayName": {
+      "value": "project-prod-waf"
+    },
+    "webAppServicePlanName": {
+      "value": "project-prod-sp"
+    },
+    "webAppServicePlanSkuName": {
+      "value": "S1"
+    },
+    "webAppServicePlanCapacity": {
+      "value": 1
+    },
+    "apiAppName": {
+      "value": "project-prod-apiapp"
+    },
+    "nodeAppName": {
+      "value": "project-prod-nodeapp"
+    },
+    "certData": {
+      "value": "XXX"
+    },
+    "loggingRetentionDays": {
+      "value": 30
+    },
+    "alwaysOn": {
+      "value": true
+    },
+    "httpsOnly": {
+      "value": true
+    },
+    "gtmContainerId": {
+      "value": "GTM-ABCD123"
+    }
+  }
+}

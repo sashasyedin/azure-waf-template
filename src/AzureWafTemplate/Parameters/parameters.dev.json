@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "Development"
+    },
+    "location": {
+      "value": "North Europe"
+    },
+    "webAppServicePlanName": {
+      "value": "project-dev-sp"
+    },
+    "webAppServicePlanSkuName": {
+      "value": "S1"
+    },
+    "webAppServicePlanCapacity": {
+      "value": 1
+    },
+    "apiAppName": {
+      "value": "project-dev-apiapp"
+    },
+    "nodeAppName": {
+      "value": "project-dev-nodeapp"
+    },
+    "authEnabled": {
+      "value": 1
+    },
+    "authClientId": {
+      "value": "00000000-0000-0000-0000-000000000000"
+    },
+    "authClientSecret": {
+      "value": "00000000-0000-0000-0000-000000000000"
+    },
+    "authTenantId": {
+      "value": "00000000-0000-0000-0000-000000000000"
+    },
+    "loggingRetentionDays": {
+      "value": 1
+    },
+    "alwaysOn": {
+      "value": true
+    },
+    "httpsOnly": {
+      "value": true
+    },
+    "gtmContainerId": {
+      "value": "GTM-ABCD123"
+    }
+  }
+}
